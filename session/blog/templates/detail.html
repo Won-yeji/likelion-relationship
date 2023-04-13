@@ -24,7 +24,7 @@
 <a href="{% url 'home' %}">홈</a>
 <a href="{% url 'edit' blog.id %}">수정하기</a>
 <a href="{% url 'delete' blog.id %}">삭제하기</a>
-{#<a href="{% url 'new_comment' blog.id %}">댓글 달기</a>#}
+<a href="{% url 'new_comment' blog.id %}">댓글 달기</a>
 
 {% if comments %}
     {% for comment in comments %}
