@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Blog(models.Model):
     title = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -8,6 +9,7 @@ class Blog(models.Model):
     image = models.ImageField(upload_to='blog/', null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     tag = models.ManyToManyField('Tag', blank=True)
+    likes = models.ManyToManyField(User, related_name='blog_likes', blank=True)
 
     class Meta:
         db_table = 'blog'
@@ -42,4 +44,18 @@ class Tag(models.Model):
         return self.name
 
 
-# TODO: Like 모델 추가하기
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
+    like_count = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'like'
+        unique_together = ('user', 'blog')
+
+    def __str__(self):
+        return self.blog.title + " | " + self.user.username
+
+    def save(self, *args, **kwargs):
+        self.like_count = Like.objects.filter(blog=self.blog).count()
+        super(Like, self).save(*args, **kwargs)

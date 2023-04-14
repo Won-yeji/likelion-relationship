@@ -25,7 +25,25 @@
 <a href="{% url 'edit' blog.id %}">수정하기</a>
 <a href="{% url 'delete' blog.id %}">삭제하기</a>
 <a href="{% url 'new_comment' blog.id %}">댓글 달기</a>
-{#TODO: 좋아요 버튼 만들기 <a></a> 태그#}
+
+
+{% if request.user.is_authenticated %}
+    {% if like_blog and like_blog.user == request.user %}
+        <a href="{% url 'like_blog' blog.id %}">좋아요 취소</a>
+    {% else %}
+        <a href="{% url 'like_blog' blog.id %}">좋아요</a>
+    {% endif %}
+{% else %}
+    <a href="{% url 'login' %}">좋아요</a>
+{% endif %}
+
+{% if like_blog %}
+    {{like_count}}명이 좋아합니다.
+{% else %}
+    0명이 좋아합니다.
+{% endif %}
+
+
 {% for comment in comments %}
 <hr />
 <p>{{comment.content}}</p>

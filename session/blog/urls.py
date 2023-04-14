@@ -12,4 +12,5 @@ urlpatterns = [
     path('blog/new_comment/<int:blog_id>/', views.new_comment, name='new_comment'),
     path('blog/create_comment/<int:blog_id>/', views.create_comment, name='create_comment'),
     # TODO: Like 관련 URL 추가하기
+    path('blog/like/<int:blog_id>/', views.like_blog, name='like_blog'),
 ]

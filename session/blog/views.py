@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from .models import Blog, Comment, Tag
+from .models import Blog, Comment, Tag, Like
 
 
 def home(request):
@@ -15,8 +15,18 @@ def detail(request, blog_id):
     blog = get_object_or_404(Blog, pk=blog_id)
     comments = Comment.objects.filter(blog=blog)
     tags = blog.tag.all()
+    like_blog = Like.objects.filter(blog=blog)
+    like_count = like_blog.count()
+    
+    context = {
+        'blog': blog,
+        'comments': comments,
+        'tags': tags,
+        'like_blog': like_blog.first() if like_blog.exists() else None,
+        'like_count': like_count,
+    }
+    return render(request, 'detail.html', context)
 
-    return render(request, 'detail.html', {'blog': blog, 'comments': comments, 'tags': tags})
 
 
 def new(request):
@@ -76,8 +86,29 @@ def create_comment(request, blog_id):
 
 
 def new_comment(request, blog_id):
-    blog = get_object_or_404(Blog, pk=blog_id)
-    return render(request, 'new_comment.html', {'blog': blog})
+    if request.user.is_anonymous:
+        return redirect('login')
+    
+    if request.user.is_authenticated:
+        blog = get_object_or_404(Blog, pk=blog_id)
+        return render(request, 'new_comment.html', {'blog': blog})
 
 
 # TODO: like 기능 구현
+def like_blog(request, blog_id):
+    blog = get_object_or_404(Blog, pk=blog_id)
+
+    if request.user.is_anonymous:
+        return redirect('login')
+    
+    if request.user.is_authenticated:
+        like = Like.objects.filter(blog=blog, user=request.user).first()
+        if like:
+            # 이미 좋아요를 누른 경우
+            like.delete()
+        else:
+            # 좋아요를 누르지 않은 경우
+            like = Like(user=request.user, blog=blog)
+            like.save()
+
+    return redirect('detail', blog_id)
